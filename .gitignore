@@ -13,6 +13,13 @@ dist
 dist-ssr
 *.local
 
+# Claves SSH locales (nunca subir la privada)
+github-actions-cpanel
+github-actions-cpanel.pub
+*.pem
+id_ed25519
+id_rsa
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
