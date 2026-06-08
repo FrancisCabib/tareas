@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma Semanal — Beneficiarios Lunding</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface-alt: #edece8;
+    --text: #1a1a1a;
+    --text-2: #6b6b6b;
+    --text-3: #999;
+    --border: rgba(0,0,0,.08);
+    --border-h: rgba(0,0,0,.15);
+    --accent: #1D9E75;
+    --accent-bg: #E1F5EE;
+    --accent-text: #085041;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.03);
+  }
+
+  [data-theme="dark"] {
+    --bg: #161615;
+    --surface: #1e1e1c;
+    --surface-alt: #2a2a27;
+    --text: #e8e6e1;
+    --text-2: #9a9890;
+    --text-3: #6b6960;
+    --border: rgba(255,255,255,.06);
+    --border-h: rgba(255,255,255,.12);
+    --accent: #3bcea0;
+    --accent-bg: #0f2e24;
+    --accent-text: #6ee8c0;
+    --shadow: 0 1px 3px rgba(0,0,0,.2), 0 4px 12px rgba(0,0,0,.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 24px 80px;
+  }
+
+  .container { max-width: 720px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+  }
+
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -.3px; }
+  .subtitle { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  .btn-icon {
+    width: 36px; height: 36px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-2); cursor: pointer; display: flex;
+    align-items: center; justify-content: center; font-size: 18px;
+    transition: all .15s;
+  }
+  .btn-icon:hover { background: var(--surface-alt); color: var(--text); border-color: var(--border-h); }
+
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 14px 16px; border: 1px solid var(--border);
+  }
+  .stat-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; }
+  .stat-val { font-size: 22px; font-weight: 600; margin-top: 2px; }
+  .stat-val.accent { color: var(--accent); }
+
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-bar {
+    width: 100%; height: 6px; background: var(--surface-alt);
+    border-radius: 3px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent); border-radius: 3px;
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-text {
+    font-size: 11px; color: var(--text-3); text-align: right;
+    margin-top: 6px; font-family: 'JetBrains Mono', monospace;
+  }
+
+  .day-block { margin-bottom: 28px; }
+
+  .day-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 10px; margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .day-label { font-size: 14px; font-weight: 600; }
+  .day-focus { font-size: 12px; color: var(--text-2); font-weight: 400; margin-left: 8px; }
+  .day-badge {
+    font-size: 11px; color: var(--text-3); background: var(--surface-alt);
+    padding: 3px 10px; border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .task-list { min-height: 8px; }
+
+  .task-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 11px 14px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 6px; cursor: grab; transition: all .15s;
+    user-select: none; position: relative;
+  }
+  .task-row:hover { border-color: var(--border-h); box-shadow: var(--shadow); }
+  .task-row:active { cursor: grabbing; }
+  .task-row.done { opacity: .45; }
+  .task-row.done .task-name { text-decoration: line-through; }
+  .task-row.dragging { opacity: .3; transform: scale(.98); }
+  .task-row.drag-over { border-color: var(--accent); border-style: dashed; }
+  .task-row.buffer { border-style: dashed; opacity: .5; cursor: default; }
+
+  .drag-handle {
+    color: var(--text-3); font-size: 16px; margin-top: 2px;
+    cursor: grab; flex-shrink: 0;
+  }
+  .drag-handle:active { cursor: grabbing; }
+
+  .check {
+    width: 20px; height: 20px; min-width: 20px;
+    border-radius: 6px; border: 1.5px solid var(--border-h);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .15s; margin-top: 1px; flex-shrink: 0;
+  }
+  .check:hover { border-color: var(--accent); }
+  .task-row.done .check { background: var(--accent); border-color: var(--accent); }
+  .task-row.done .check i { color: #fff; font-size: 12px; }
+
+  .task-info { flex: 1; min-width: 0; }
+  .task-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .task-name { font-size: 13px; font-weight: 500; }
+
+  .badge {
+    font-size: 10px; padding: 2px 8px; border-radius: 6px;
+    font-weight: 500; white-space: nowrap; flex-shrink: 0;
+  }
+  .b-fotos { background: #EEEDFE; color: #3C3489; }
+  .b-dominio { background: #FCEBEB; color: #791F1F; }
+  .b-desarrollo { background: #E6F1FB; color: #0C447C; }
+  .b-doc { background: #FAEEDA; color: #633806; }
+  .b-onboarding { background: #E1F5EE; color: #085041; }
+  .b-info { background: #F1EFE8; color: #444441; }
+
+  [data-theme="dark"] .b-fotos { background: #26215C; color: #CECBF6; }
+  [data-theme="dark"] .b-dominio { background: #501313; color: #F7C1C1; }
+  [data-theme="dark"] .b-desarrollo { background: #042C53; color: #B5D4F4; }
+  [data-theme="dark"] .b-doc { background: #412402; color: #FAC775; }
+  [data-theme="dark"] .b-onboarding { background: #04342C; color: #9FE1CB; }
+  [data-theme="dark"] .b-info { background: #2C2C2A; color: #D3D1C7; }
+
+  .task-meta { font-size: 11px; color: var(--text-2); display: flex; gap: 14px; margin-top: 4px; }
+  .task-meta i { font-size: 12px; vertical-align: -1px; margin-right: 3px; }
+
+  .drop-zone {
+    height: 4px; border-radius: 2px; margin: 2px 0;
+    transition: all .15s;
+  }
+  .drop-zone.active {
+    height: 40px; background: var(--accent-bg);
+    border: 2px dashed var(--accent); border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--accent-text);
+  }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--text); color: var(--bg); padding: 10px 20px;
+    border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 99;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    body { padding: 20px 16px 60px; }
+    .day-focus { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>Cronograma semanal</h1>
+      <p class="subtitle">Beneficiarios Lunding — 8 al 12 junio 2026</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" id="themeBtn" title="Cambiar tema"><i class="ti ti-moon"></i></button>
+      <button class="btn-icon" id="resetBtn" title="Reiniciar todo"><i class="ti ti-refresh"></i></button>
+    </div>
+  </header>
+
+  <div class="stats-row" id="stats"></div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+    <div class="progress-text" id="progText"></div>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'cronograma-lunding-v1';
+
+const defaultDays = [
+  { id:'d0', label:'Lunes 8 junio', focus:'Solicitudes + dominios', tasks:[
+    { id:'t0', name:'Solicitar fotos', benef:'Eventos BFA', tipo:'Fotos', resp:'Francis → Beneficiario', bc:'b-fotos', done:false },
+    { id:'t1', name:'Pedir las fotos en el Drive', benef:'Eventos Nantoco', tipo:'Fotos', resp:'Francis → Beneficiario', bc:'b-fotos', done:false },
+    { id:'t2', name:'Solicitar las fotos', benef:'Paola Torrealba', tipo:'Fotos', resp:'Francis → Beneficiario', bc:'b-fotos', done:false },
+    { id:'t3', name:'Mandar la info faltante', benef:'LC Obras Civiles', tipo:'Info', resp:'Francis → Beneficiario', bc:'b-info', done:false },
+    { id:'t4', name:'Comprar dominio', benef:'Dayna', tipo:'Dominio/Hosting', resp:'Francis', bc:'b-dominio', done:false },
+    { id:'t5', name:'Comprar dominio', benef:'Eventos BFA', tipo:'Dominio/Hosting', resp:'Francis', bc:'b-dominio', done:false }
+  ]},
+  { id:'d1', label:'Martes 9 junio', focus:'Hosting + fotos propias', tasks:[
+    { id:'t6', name:'Comprar hosting y dominio', benef:'Neomarc', tipo:'Dominio/Hosting', resp:'Francis', bc:'b-dominio', done:false },
+    { id:'t7', name:'Buscar las fotos de los neumáticos', benef:'Neomarc', tipo:'Fotos', resp:'Francis', bc:'b-fotos', done:false },
+    { id:'t8', name:'Subir las fotos', benef:'Mi Jardín', tipo:'Fotos', resp:'Francis', bc:'b-fotos', done:false },
+    { id:'t9', name:'Publicar fotos', benef:'Dayna', tipo:'Fotos', resp:'Francis', bc:'b-fotos', done:false }
+  ]},
+  { id:'d2', label:'Miércoles 10 junio', focus:'Desarrollo ligero', tasks:[
+    { id:'t10', name:'Conectar Git al cPanel', benef:'Mi Jardín', tipo:'Desarrollo', resp:'Francis', bc:'b-desarrollo', done:false },
+    { id:'t11', name:'Levantar la web nueva', benef:'LC Obras Civiles', tipo:'Desarrollo', resp:'Francis', bc:'b-desarrollo', done:false },
+    { id:'t12', name:'Crear sistema de cotización', benef:'Paola Torrealba', tipo:'Desarrollo', resp:'Francis (inicio)', bc:'b-desarrollo', done:false }
+  ]},
+  { id:'d3', label:'Jueves 11 junio', focus:'Desarrollo pesado + onboarding', tasks:[
+    { id:'t13', name:'Terminar el SaaS', benef:'Neomarc', tipo:'Desarrollo', resp:'Francis', bc:'b-desarrollo', done:false },
+    { id:'t14', name:'Crear onboarding cotizador/catálogo', benef:'Dayna', tipo:'Onboarding', resp:'Francis', bc:'b-onboarding', done:false },
+    { id:'t15', name:'Instalar onboarding', benef:'Paola Torrealba', tipo:'Onboarding', resp:'Francis', bc:'b-onboarding', done:false }
+  ]},
+  { id:'d4', label:'Viernes 12 junio', focus:'Cierre + documentación', tasks:[
+    { id:'t16', name:'Hacer documento de entrega formal', benef:'Mi Jardín', tipo:'Documentación', resp:'Francis', bc:'b-doc', done:false },
+    { id:'t17', name:'Buffer: tareas atrasadas', benef:'—', tipo:'—', resp:'—', bc:'b-info', done:false, buffer:true }
+  ]}
+];
+
+let days = load() || JSON.parse(JSON.stringify(defaultDays));
+let dragTask = null;
+let dragFromDay = null;
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(days)); }
+
+function load() {
+  try { const d = localStorage.getItem(STORAGE_KEY); return d ? JSON.parse(d) : null; }
+  catch(e) { return null; }
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function countReal() { return days.reduce((s,d) => s + d.tasks.filter(t => !t.buffer).length, 0); }
+function countDone() { return days.reduce((s,d) => s + d.tasks.filter(t => !t.buffer && t.done).length, 0); }
+
+function updateStats() {
+  const total = countReal(), done = countDone();
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('stats').innerHTML =
+    `<div class="stat-card"><div class="stat-label">Completadas</div><div class="stat-val accent">${done}</div></div>` +
+    `<div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-val">${total - done}</div></div>` +
+    `<div class="stat-card"><div class="stat-label">Total</div><div class="stat-val">${total}</div></div>` +
+    `<div class="stat-card"><div class="stat-label">Avance</div><div class="stat-val accent">${pct}%</div></div>`;
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('progText').textContent = `${done} de ${total} completadas`;
+}
+
+function render() {
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+
+  days.forEach((day, di) => {
+    const block = document.createElement('div');
+    block.className = 'day-block';
+
+    const realTasks = day.tasks.filter(t => !t.buffer);
+    const doneTasks = realTasks.filter(t => t.done).length;
+
+    block.innerHTML = `<div class="day-header">
+      <div><span class="day-label">${day.label}</span><span class="day-focus">— ${day.focus}</span></div>
+      <span class="day-badge">${doneTasks}/${realTasks.length}</span>
+    </div>`;
+
+    const taskList = document.createElement('div');
+    taskList.className = 'task-list';
+    taskList.dataset.day = di;
+
+    taskList.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+
+    taskList.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!dragTask) return;
+      const sourceDayIdx = dragFromDay;
+      const sourceDay = days[sourceDayIdx];
+      const targetDayIdx = parseInt(taskList.dataset.day);
+      const targetDay = days[targetDayIdx];
+
+      const taskIdx = sourceDay.tasks.findIndex(t => t.id === dragTask);
+      if (taskIdx === -1) return;
+      const [task] = sourceDay.tasks.splice(taskIdx, 1);
+      targetDay.tasks.push(task);
+
+      save();
+      render();
+      updateStats();
+      toast('Tarea movida a ' + targetDay.label);
+    });
+
+    day.tasks.forEach((task, ti) => {
+      const row = document.createElement('div');
+      row.className = 'task-row' + (task.done ? ' done' : '') + (task.buffer ? ' buffer' : '');
+      row.draggable = !task.buffer;
+      row.dataset.taskId = task.id;
+      row.dataset.dayIdx = di;
+
+      if (!task.buffer) {
+        row.addEventListener('dragstart', e => {
+          dragTask = task.id;
+          dragFromDay = di;
+          row.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', task.id);
+        });
+
+        row.addEventListener('dragend', () => {
+          dragTask = null;
+          dragFromDay = null;
+          row.classList.remove('dragging');
+          document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        });
+
+        row.addEventListener('dragover', e => {
+          e.preventDefault();
+          if (dragTask === task.id) return;
+          row.classList.add('drag-over');
+        });
+
+        row.addEventListener('dragleave', () => { row.classList.remove('drag-over'); });
+
+        row.addEventListener('drop', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          row.classList.remove('drag-over');
+          if (!dragTask || dragTask === task.id) return;
+
+          const sourceDayIdx = dragFromDay;
+          const sourceDay = days[sourceDayIdx];
+          const targetDayIdx = di;
+          const targetDay = days[targetDayIdx];
+
+          const srcIdx = sourceDay.tasks.findIndex(t => t.id === dragTask);
+          if (srcIdx === -1) return;
+          const [movedTask] = sourceDay.tasks.splice(srcIdx, 1);
+
+          const tgtIdx = targetDay.tasks.findIndex(t => t.id === task.id);
+          targetDay.tasks.splice(tgtIdx, 0, movedTask);
+
+          save();
+          render();
+          updateStats();
+          toast('Tarea reordenada');
+        });
+      }
+
+      let html = '';
+      if (!task.buffer) {
+        html += `<i class="ti ti-grip-vertical drag-handle" aria-hidden="true"></i>`;
+        html += `<div class="check" data-task="${task.id}" data-day="${di}">${task.done ? '<i class="ti ti-check" aria-hidden="true"></i>' : ''}</div>`;
+      }
+
+      html += `<div class="task-info"><div class="task-top"><span class="task-name">${task.buffer ? '<i class="ti ti-clock" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>' : ''}${task.name}</span>`;
+      if (task.tipo !== '—') html += `<span class="badge ${task.bc}">${task.tipo}</span>`;
+      html += `</div>`;
+      if (!task.buffer) {
+        html += `<div class="task-meta"><span><i class="ti ti-user" aria-hidden="true"></i>${task.benef}</span><span><i class="ti ti-arrow-right" aria-hidden="true"></i>${task.resp}</span></div>`;
+      }
+      html += `</div>`;
+      row.innerHTML = html;
+
+      taskList.appendChild(row);
+    });
+
+    block.appendChild(taskList);
+    list.appendChild(block);
+  });
+
+  document.querySelectorAll('.check').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const taskId = el.dataset.task;
+      const dayIdx = parseInt(el.dataset.day);
+      const task = days[dayIdx].tasks.find(t => t.id === taskId);
+      if (task) {
+        task.done = !task.done;
+        save();
+        render();
+        updateStats();
+      }
+    });
+  });
+}
+
+// Theme
+function setTheme(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.getElementById('themeBtn').innerHTML = dark ? '<i class="ti ti-sun"></i>' : '<i class="ti ti-moon"></i>';
+  localStorage.setItem('cronograma-theme', dark ? 'dark' : 'light');
+}
+
+const savedTheme = localStorage.getItem('cronograma-theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+setTheme(savedTheme ? savedTheme === 'dark' : prefersDark);
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  setTheme(!isDark);
+});
+
+// Reset
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm('¿Reiniciar todas las tareas y el orden?')) {
+    days = JSON.parse(JSON.stringify(defaultDays));
+    save();
+    render();
+    updateStats();
+    toast('Todo reiniciado');
+  }
+});
+
+render();
+updateStats();
+</script>
+</body>
+</html>
