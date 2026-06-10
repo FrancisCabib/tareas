@@ -387,10 +387,10 @@ h1 {
 .add-task-btn {
   width: 100%;
   padding: 9px 14px;
-  border: 1px dashed var(--border-h);
+  border: 1px solid #2563eb;
   border-radius: var(--radius);
-  background: transparent;
-  color: var(--text-2);
+  background: #2563eb;
+  color: #fff;
   font-family: inherit;
   font-size: 12px;
   font-weight: 500;
@@ -402,9 +402,18 @@ h1 {
   transition: all 0.15s;
 }
 .add-task-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-bg);
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  filter: brightness(1.02);
+}
+[data-theme='dark'] .add-task-btn {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+[data-theme='dark'] .add-task-btn:hover {
+  background: #2563eb;
+  border-color: #2563eb;
 }
 .add-task-btn i {
   font-size: 15px;
