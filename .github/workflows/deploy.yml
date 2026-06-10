@@ -15,7 +15,7 @@ jobs:
         with:
           host: ${{ secrets.CPANEL_HOST }}
           username: ${{ secrets.CPANEL_USER }}
-          key: ${{ secrets.CPANEL_SSH_KEY }}
+          key: ${{ secrets.LLAVE_HOSTING }}
           port: ${{ secrets.CPANEL_PORT }}
           script_stop: true
           script: |
